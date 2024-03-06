@@ -1,4 +1,5 @@
-﻿using SmartCharging.Infrastructure.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartCharging.Infrastructure.Contracts;
 using SmartCharging.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,16 @@ namespace SmartCharging.Infrastructure.Repos
                 throw new ArgumentNullException(nameof(entity));
 
             _dbContext.Set<TEntity>().Add(entity);
+        }
+
+        public async Task DeleteById<TEntity>(Guid id) where TEntity : class
+        {
+            var entity = await _dbContext.Set<TEntity>().FindAsync(id);
+
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            _dbContext.Set<TEntity>().Remove(entity);
         }
 
         public async Task SaveChangesAsync()
