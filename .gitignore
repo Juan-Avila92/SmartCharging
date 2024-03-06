@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/SmartCharging.Infrastructure/obj
+/SmartCharging.Infrastructure/bin/Debug/net8.0
+/SmartCharging.Domain/obj
+/SmartCharging.Domain/bin/Debug/net8.0
+/SmartCharging/bin/Debug/net8.0
+/SmartCharging/obj
