@@ -15,7 +15,7 @@ namespace SmartCharging.Controllers
             _repo = repo;
         }
 
-        [HttpPost(Name = "Create")]
+        [HttpPost("new")]
         public async Task<IActionResult> Create()
         {
             var a = new SmartGroup { Name = "A" };
@@ -23,6 +23,15 @@ namespace SmartCharging.Controllers
             await _repo.SaveChangesAsync();
 
             return Ok("Created");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            await _repo.DeleteById<SmartGroup>(id);
+            await _repo.SaveChangesAsync();
+
+            return Ok("Removed");
         }
     }
 }
