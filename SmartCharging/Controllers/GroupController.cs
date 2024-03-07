@@ -1,37 +1,57 @@
 using Microsoft.AspNetCore.Mvc;
-using SmartCharging.Domain.Models;
-using SmartCharging.Infrastructure.Contracts;
+using SmartCharging.API.Data.Repository.Contracts;
+using SmartCharging.API.Domain.Contracts;
+using SmartCharging.API.Domain.Models;
+using SmartCharging.API.DTOs;
+using SmartCharging.API.ViewModelServices.Contracts;
 
 namespace SmartCharging.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class GroupController : ControllerBase
+    public class GroupController : Controller
     {
-        private readonly IRepository _repo;
+        private readonly ISmartGroupServices _smartGroupServices;
+        private readonly ISmartGroupViewModelService _smartGroupViewModelService;
 
-        public GroupController(IRepository repo)
+        public GroupController(ISmartGroupServices services,
+            ISmartGroupViewModelService smartGroupViewModelService)
         {
-            _repo = repo;
+            _smartGroupServices = services;
+            _smartGroupViewModelService = smartGroupViewModelService;
         }
 
-        [HttpPost("new")]
-        public async Task<IActionResult> Create()
+        [HttpPost("[controller]")]
+        public async Task<IResult> Create([FromBody] SmartGroupDTO smartGroupDTO)
         {
-            var a = new SmartGroup { Name = "A" };
-            _repo.Create(a);
-            await _repo.SaveChangesAsync();
+            var result = await _smartGroupServices.Create(smartGroupDTO);
 
-            return Ok("Created");
+            return result;
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        [HttpGet("[controller]/All")]
+        public Task<IActionResult> GetAll()
         {
-            await _repo.DeleteById<SmartGroup>(id);
-            await _repo.SaveChangesAsync();
+            var groups = _smartGroupServices.GetAll();
 
-            return Ok("Removed");
+            var viewModels = _smartGroupViewModelService.ConvertToViewModel(groups);
+
+            return Task.FromResult<IActionResult>(Json(viewModels));
+        }
+
+        [HttpDelete("[controller]/{id}")]
+        public async Task<IResult> Delete([FromRoute] Guid id)
+        {
+            var result = await _smartGroupServices.Delete(id);
+
+            return result;
+        }
+
+        [HttpPut("[controller]/{id}")]
+        public async Task<IResult> Update([FromRoute] Guid id, [FromBody] SmartGroupDTO smartGroupDTO)
+        {
+            var result = await _smartGroupServices.Update(id, smartGroupDTO);
+
+            return result;
         }
     }
 }
