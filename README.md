@@ -7,7 +7,11 @@
 
 #2
 Create a new local server in the "SQL Server Object Explorer"
-![image](https://github.com/Juan-Avila92/SmartChargingAssignment/assets/43795308/3e0b4600-f295-49bd-93e4-509cdbf2dc14)
+
+<p align="center">
+  ![image](https://github.com/Juan-Avila92/SmartChargingAssignment/assets/43795308/3e0b4600-f295-49bd-93e4-509cdbf2dc14)
+</p>
+
 
 Inside your program.cs file in "SmartChargin.API" folder you should 
 
