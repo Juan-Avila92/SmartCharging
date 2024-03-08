@@ -9,20 +9,25 @@ using System.Text;
 using System.Threading.Tasks;
 using SmartCharging.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
+using Microsoft.IdentityModel.Tokens;
 
 namespace SmartCharging.API.Domain.Services
 {
     public class SmartGroupServices : ISmartGroupServices
     {
         private readonly IRepository _repo;
+        private readonly ISmartGroupsRepository _smartGroupRepo;
         private int _minimumCapacityInAmps;
-        public SmartGroupServices(IRepository repository)
+        public SmartGroupServices(IRepository repository,
+            ISmartGroupsRepository smartGroupRepo)
         {
             _repo = repository;
             _minimumCapacityInAmps = RangeValues.GetMinumumCapacityInAmps();
+            _smartGroupRepo = smartGroupRepo;
         }
 
-        public async Task<IResult> Create(SmartGroupDTO smartGroupDTO)
+        public async Task<Result<SmartGroup>> Create(SmartGroupDTO smartGroupDTO)
         {
             var newSmartGroup = new SmartGroup()
             {
@@ -34,23 +39,23 @@ namespace SmartCharging.API.Domain.Services
 
             if(!canBeCreated)
             {
-                return Results.BadRequest("Unable to create group. Capacity in Amps must be greater than zero.");
+                return new Result<SmartGroup>().Fail("Unable to create group. Capacity in Amps must be greater than zero.");
             }
 
-            _repo.Create(newSmartGroup);
+            var createdSmartGroup = _repo.Create(newSmartGroup);
             await _repo.SaveChangesAsync();
 
-            return Results.Ok("A new group has been created.");
+            return new Result<SmartGroup>().Ok("Group has been created").WithData(createdSmartGroup);
         }
 
         public List<SmartGroup> GetAll()
         {
-            var smartGroups = _repo.GetAll<SmartGroup>();
+            var smartGroups = _smartGroupRepo.GetAllWithChargeStations();
 
             return smartGroups;
         }
 
-        public async Task<IResult> Update(Guid id, SmartGroupDTO smartGroupDTO)
+        public async Task<Result<SmartGroup>> Update(Guid id, SmartGroupDTO smartGroupDTO)
         {
             var groupToBeUpdated = _repo.GetById<SmartGroup>(id);
 
@@ -61,21 +66,21 @@ namespace SmartCharging.API.Domain.Services
 
             if (!canBeUpdated)
             {
-                return Results.BadRequest("Unable to create group. Capacity in Amps must be greater than zero.");
+                return new Result<SmartGroup>().Fail("Unable to update group. Capacity in Amps must be greater than zero.");
             }
 
             _repo.Update(groupToBeUpdated);
             await _repo.SaveChangesAsync();
 
-            return Results.Ok("Group has been updated.");
+            return new Result<SmartGroup>().Ok("Group has been updated").WithData(groupToBeUpdated);
         }
 
-        public async Task<IResult> Delete(Guid id)
+        public async Task<Result> Delete(Guid id)
         {
             await _repo.DeleteById<SmartGroup>(id);
             await _repo.SaveChangesAsync();
 
-            return Results.Ok("Group has been deleted.");
+            return new Result().Ok("Group has been deleted.");
         }
 
         private bool IsCapacityInAmpsGreaterThanZero(int capacityInArms)
