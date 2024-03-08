@@ -21,9 +21,14 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add services and repositories.
 builder.Services.AddScoped<IRepository, Repository>();
+builder.Services.AddScoped<ISmartGroupsRepository, SmartGroupsRepository>();
+builder.Services.AddScoped<IChargeStationRepository, ChargeStationRepository>();
 builder.Services.AddScoped<ISmartGroupServices, SmartGroupServices>();
 builder.Services.AddScoped<IChargeStationServices, ChargeStationServices>();
+builder.Services.AddScoped<IConnectorServices, ConnectorServices>();
 builder.Services.AddScoped<ISmartGroupViewModelService, SmartGroupViewModelService>();
 builder.Services.AddScoped<IChargeStationViewModelService, ChargeStationViewModelService>();
 
