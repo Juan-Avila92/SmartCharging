@@ -13,32 +13,20 @@ namespace SmartCharging.Controllers
     {
         private readonly IChargeStationServices _chargeStationServices;
         private readonly IChargeStationViewModelService _chargeStationViewModelService;
-        private readonly IRepository _repo;
 
-        public ChargeStationController(IChargeStationServices services, 
-            IRepository repo,
+        public ChargeStationController(IChargeStationServices services,
             IChargeStationViewModelService chargeStationViewModelService)
         {
             _chargeStationServices = services;
-            _repo = repo;
             _chargeStationViewModelService = chargeStationViewModelService;
         }
 
         [HttpPost("/[controller]/group/{groupId}")]
-        public async Task<IResult> Create([FromRoute] Guid groupId, [FromBody] ChargeStationDTO chargeStationDTO)
+        public async Task<IActionResult> Create([FromRoute] Guid groupId, [FromBody] ChargeStationDTO chargeStationDTO)
         {
-            var doesGroupExist = await _repo.ExistAsync<SmartGroup>(group => group.SmartGroupId.Equals(groupId));
-            var doesChargeStationExistInGroupAlready = await _repo.ExistAsync<ChargeStation>(chargeStation => chargeStation.SmartGroupId.Equals(groupId));
-
-            if (!doesGroupExist)
-                return Results.BadRequest("Cannot create a charge station because group doesn't exist.");
-
-            if (doesChargeStationExistInGroupAlready)
-                return Results.BadRequest("Cannot create a charge station because it already belongs to a group.");
-
             var result = await _chargeStationServices.Create(groupId, chargeStationDTO);
 
-            return result;
+            return Json(result);
         }
 
         [HttpGet("[controller]/All")]
@@ -52,19 +40,20 @@ namespace SmartCharging.Controllers
         }
 
         [HttpDelete("/[controller]/{id}")]
-        public async Task<IResult> Delete([FromRoute] Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var result = await _chargeStationServices.Delete(id);
 
-            return result;
+            return Json(result);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IResult> Update([FromRoute] Guid id, [FromBody] ChargeStationDTO chargeStationDTO)
+        [HttpPut("[Controller]/{id}")]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] ChargeStationBody body)
         {
-            var result = await _chargeStationServices.Update(id, chargeStationDTO);
 
-            return result;
+            var result = await _chargeStationServices.Update(id, new ChargeStationDTO() { Name = body.Name});
+
+            return Json(result);
         }
     }
 }
