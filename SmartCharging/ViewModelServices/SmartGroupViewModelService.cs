@@ -14,6 +14,18 @@ namespace SmartCharging.API.ViewModelServices
                 Name = smartGroup.Name,
                 SmartGroupId = smartGroup.SmartGroupId,
                 CapacityInAmps = smartGroup.CapacityInAmps,
+                ChargeStationViewModels = smartGroup.ChargeStations.Select(chargeStation => new ChargeStationViewModel()
+                {
+                    SmartGroupId = chargeStation.SmartGroupId,
+                    ChargeStationId = chargeStation.ChargeStationId,
+                    Name = chargeStation.Name,
+                    Connectors = chargeStation.Connectors.Select(connector => new ConnectorViewModel()
+                    {
+                        ChargeStationId = connector.ChargeStationId,
+                        MaxCurrentInAmps = connector.MaxCurrentInAmps,
+                        ConnectorId = connector.ConnectorId
+                    }).ToList(),
+                }).ToList()
             }).ToList();
         }
     }

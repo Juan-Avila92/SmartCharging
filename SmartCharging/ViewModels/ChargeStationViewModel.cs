@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SmartCharging.API.Domain.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace SmartCharging.API.ViewModels
 {
@@ -14,6 +15,6 @@ namespace SmartCharging.API.ViewModels
 
         public string Name { get; set; }
 
-        public int Connectors { get; set; }
+        public List<ConnectorViewModel> Connectors { get; set; }
     }
 }
