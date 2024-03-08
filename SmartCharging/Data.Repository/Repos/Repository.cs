@@ -13,15 +13,24 @@ namespace SmartCharging.API.Data.Repository.Repos
             _dbContext.Database.EnsureCreated();
         }
 
-        public void Create<TEntity>(TEntity entity) where TEntity : class
+        public TEntity Create<TEntity>(TEntity entity) where TEntity : class
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            _dbContext.Set<TEntity>().Add(entity);
+            return _dbContext.Set<TEntity>().Add(entity).Entity;
         }
 
         public TEntity GetById<TEntity>(Guid id) where TEntity : class
+        {
+            var entity = _dbContext.Set<TEntity>().Find(id);
+
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            return entity;
+        }
+        public TEntity GetById<TEntity>(int id) where TEntity : class
         {
             var entity = _dbContext.Set<TEntity>().Find(id);
 
@@ -50,6 +59,16 @@ namespace SmartCharging.API.Data.Repository.Repos
         }
 
         public async Task DeleteById<TEntity>(Guid id) where TEntity : class
+        {
+            var entity = await _dbContext.Set<TEntity>().FindAsync(id);
+
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            _dbContext.Set<TEntity>().Remove(entity);
+        }
+
+        public async Task DeleteById<TEntity>(int id) where TEntity : class
         {
             var entity = await _dbContext.Set<TEntity>().FindAsync(id);
 
