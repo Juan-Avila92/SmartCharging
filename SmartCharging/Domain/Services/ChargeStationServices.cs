@@ -8,82 +8,77 @@ using System.Text;
 using System.Threading.Tasks;
 using SmartCharging.API.DTOs;
 using SmartCharging.API.Domain.Utilities;
+using SmartCharging.API.Data.Repository.Repos;
 
 namespace SmartCharging.API.Domain.Services
 {
     public class ChargeStationServices : IChargeStationServices
     {
         private readonly IRepository _repo;
-        private int _minimumNumberOfConnectors;
-        private int _maximumNumberOfConnectors;
+        private readonly IChargeStationRepository _chargeStationRepo;
+        private readonly IConnectorServices _connectorServices;
 
-        public ChargeStationServices(IRepository repository)
+        public ChargeStationServices(IRepository repository,
+            IConnectorServices connectorServices,
+            IChargeStationRepository chargeStationRepo)
         {
             _repo = repository;
-            _minimumNumberOfConnectors = RangeValues.GetMinumumNumberOfConnectors();
-            _maximumNumberOfConnectors = RangeValues.GetMaximumNumberOfConnectors();
+            _connectorServices = connectorServices;
+            _chargeStationRepo = chargeStationRepo;
         }
 
-        public async Task<IResult> Create(Guid groupId, ChargeStationDTO chargeStationDTO)
+        public async Task<Result<ChargeStation>> Create(Guid groupId, ChargeStationDTO chargeStationDTO)
         {
-            var isNumberOfConnectorsAllowed = ValidateNumberOfConnectors(chargeStationDTO.Connectors);
+            var doesGroupExist = await _repo.ExistAsync<SmartGroup>(group => group.SmartGroupId.Equals(groupId));
 
-            if(!isNumberOfConnectorsAllowed)
-            {
-                return Results.BadRequest("Unable to create charge station. Connecto number must be between 1 and 5");
-            }
+            if (chargeStationDTO.Connectors.Any(c => c.MaxCurrentInAmps <= 0))
+                return new Result<ChargeStation>().Fail("Cannot create a charge station because at least one connector has got invalid current amps.");
+
+            if (!doesGroupExist)
+                return new Result<ChargeStation>().Fail("Cannot create a charge station because group doesn't exist.");
 
             var newChargeStation = CreateNewChargeStation(groupId, chargeStationDTO);
 
-            _repo.Create(newChargeStation);
+            var createdChargeStation = _repo.Create(newChargeStation);
+
+            if (createdChargeStation.Connectors.Count < 1)
+                return new Result<ChargeStation>().Fail("Cannot create a charge station. There should be at least one connector");
+
+            if (createdChargeStation.Connectors.Count > 5)
+                return new Result<ChargeStation>().Fail("Cannot create a charge station. Number of Connectors should be less than 5");
+
+
+
             await _repo.SaveChangesAsync();
 
-            return Results.Ok("A new charge station has been created.");
+            return new Result<ChargeStation>().Ok("A new charge station has been created.").WithData(createdChargeStation);
         }
 
         public List<ChargeStation> GetAll()
         {
-            var chargeStations = _repo.GetAll<ChargeStation>();
+            var chargeStations = _chargeStationRepo.GetAllWithConnectors();
 
             return chargeStations;
         }
 
-        public async Task<IResult> Update(Guid id, ChargeStationDTO chargeStationDTO)
+        public async Task<Result<ChargeStation>> Update(Guid id, ChargeStationDTO chargeStationDTO)
         {
             var chargeStationToBeUpdated = _repo.GetById<ChargeStation>(id);
 
             chargeStationToBeUpdated.Name = chargeStationDTO.Name;
-            chargeStationToBeUpdated.Connectors = chargeStationDTO.Connectors;
-
-            var isNumberOfConnectorsAllowed = ValidateNumberOfConnectors(chargeStationDTO.Connectors);
-
-            if (!isNumberOfConnectorsAllowed)
-            {
-                return Results.BadRequest("Unable to update charge station. Connecto number must be between 1 and 5");
-            }
 
             _repo.Update(chargeStationToBeUpdated);
             await _repo.SaveChangesAsync();
 
-            return Results.Ok("Charge station has been updated.");
+            return new Result<ChargeStation>().Ok("Charge station has been updated.").WithData(chargeStationToBeUpdated);
         }
 
-        public async Task<IResult> Delete(Guid id)
+        public async Task<Result<ChargeStation>> Delete(Guid id)
         {
             await _repo.DeleteById<ChargeStation>(id);
             await _repo.SaveChangesAsync();
 
-            return Results.Ok("Charge station has been deleted.");
-        }
-
-        private bool ValidateNumberOfConnectors(int connectors)
-        {
-            if(connectors >= _minimumNumberOfConnectors && connectors <= _maximumNumberOfConnectors)
-            {
-                return true;
-            }
-
-            return false;
+            return new Result<ChargeStation>().Ok("Charge station has been updated.");
         }
 
         private ChargeStation CreateNewChargeStation(Guid smartGroupId, ChargeStationDTO chargeStationDTO)
@@ -92,7 +87,7 @@ namespace SmartCharging.API.Domain.Services
             {
                 SmartGroupId = smartGroupId,
                 Name = chargeStationDTO.Name,
-                Connectors = chargeStationDTO.Connectors
+                Connectors = chargeStationDTO.Connectors.Select(c => new Connector() { MaxCurrentInAmps = c.MaxCurrentInAmps}).ToList()
             };
         }
     }
