@@ -5,12 +5,12 @@
         public ChargeStation()
         {
             Name = string.Empty;
-            Connectors = 1;
+            Connectors = new List<Connector>();
         }
 
         public Guid ChargeStationId { get; set; }
         public Guid SmartGroupId { get; set; }
         public string Name { get; set; }
-        public int Connectors { get; set; }
+        public List<Connector> Connectors { get; set;}
     }
 }

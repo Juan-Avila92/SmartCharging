@@ -17,5 +17,7 @@ namespace SmartCharging.API.Domain.Models
 
         [Required]
         public int CapacityInAmps { get; set; }
+
+        public List<ChargeStation> ChargeStations { get; set; } = new List<ChargeStation>();
     }
 }
