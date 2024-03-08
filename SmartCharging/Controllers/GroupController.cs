@@ -21,11 +21,14 @@ namespace SmartCharging.Controllers
         }
 
         [HttpPost("[controller]")]
-        public async Task<IResult> Create([FromBody] SmartGroupDTO smartGroupDTO)
+        public async Task<IActionResult> Create([FromBody] SmartGroupDTO smartGroupDTO)
         {
             var result = await _smartGroupServices.Create(smartGroupDTO);
 
-            return result;
+            if (!result.IsOk)
+                BadRequest(result.Message);
+
+            return Json(result);
         }
 
         [HttpGet("[controller]/All")]
@@ -39,19 +42,25 @@ namespace SmartCharging.Controllers
         }
 
         [HttpDelete("[controller]/{id}")]
-        public async Task<IResult> Delete([FromRoute] Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var result = await _smartGroupServices.Delete(id);
 
-            return result;
+            if (!result.IsOk)
+                BadRequest(result.Message);
+
+            return Json(result);
         }
 
         [HttpPut("[controller]/{id}")]
-        public async Task<IResult> Update([FromRoute] Guid id, [FromBody] SmartGroupDTO smartGroupDTO)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] SmartGroupDTO smartGroupDTO)
         {
             var result = await _smartGroupServices.Update(id, smartGroupDTO);
 
-            return result;
+            if (!result.IsOk)
+                BadRequest(result.Message);
+
+            return Json(result);
         }
     }
 }
