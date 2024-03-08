@@ -2,15 +2,13 @@
 
 namespace SmartCharging.API.DTOs
 {
-    public class ChargeStationDTO
+    public class ChargeStationBody
     {
-        public ChargeStationDTO() 
+        public ChargeStationBody() 
         { 
             Name = string.Empty;
-            Connectors = new List<Connector>();
         }
         public string Name { get; set; }
-
-        public List<Connector> Connectors { get; set; }
+        public List<ConnectorDTO> Connectors { get; set; }
     }
 }
