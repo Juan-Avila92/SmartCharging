@@ -9,11 +9,10 @@ using System.Threading.Tasks;
 
 namespace SmartCharging.API.Domain.Contracts
 {
-    public interface ISmartGroupServices
+    public interface IConnectorServices
     {
-        Task<Result<SmartGroup>> Create(SmartGroupDTO smartGroupDTO);
-        List<SmartGroup> GetAll();
-        Task<Result<SmartGroup>> Update(Guid id, SmartGroupDTO smartGroupDTO);
-        Task <Result> Delete(Guid id);
+        Task<Result<Connector>> CreateAsync(Guid chargeStationId, ConnectorDTO connectorDTO);
+        Task<Result<Connector>> UpdateAsync(int id, ConnectorDTO connectorDTO);
+        Task <Result<Connector>> DeleteAsync(int id);
     }
 }

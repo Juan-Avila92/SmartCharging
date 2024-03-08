@@ -11,9 +11,9 @@ namespace SmartCharging.API.Domain.Contracts
 {
     public interface IChargeStationServices
     {
-        Task<IResult> Create(Guid groupId, ChargeStationDTO chargeStationDTO);
+        Task<Result<ChargeStation>> Create(Guid groupId, ChargeStationDTO chargeStationDTO);
         List<ChargeStation> GetAll();
-        Task<IResult> Update(Guid id, ChargeStationDTO chargeStationDTO);
-        Task<IResult> Delete(Guid id);
+        Task<Result<ChargeStation>> Update(Guid id, ChargeStationDTO chargeStationDTO);
+        Task<Result<ChargeStation>> Delete(Guid id);
     }
 }
